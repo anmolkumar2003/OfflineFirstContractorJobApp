@@ -740,15 +740,17 @@
                                 <rect key="frame" x="24" y="192" width="327" height="25"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your Jobs (0)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mUq-vU-idm">
-                                        <rect key="frame" x="0.0" y="0.0" width="102.5" height="25"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <nil key="textColor"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="113" height="25"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                        <color key="textColor" red="0.058823529411764705" green="0.090196078431372548" blue="0.16470588235294117" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K7C-QO-ntZ">
-                                        <rect key="frame" x="102.5" y="0.0" width="224.5" height="25"/>
+                                        <rect key="frame" x="113" y="0.0" width="214" height="25"/>
                                         <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain" title="View All"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="View All">
+                                            <fontDescription key="titleFontDescription" type="system" weight="medium" pointSize="14"/>
+                                        </buttonConfiguration>
                                         <connections>
                                             <action selector="viewAllBtn:" destination="ScC-45-QHB" eventType="touchUpInside" id="vc4-Wr-fu3"/>
                                         </connections>
@@ -805,7 +807,7 @@
                                         </subviews>
                                     </stackView>
                                 </subviews>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="SI7-kj-PwW" firstAttribute="top" secondItem="Guc-sU-qEO" secondAttribute="top" constant="17" id="D6b-Rk-cSa"/>
                                     <constraint firstItem="Te4-vQ-bqE" firstAttribute="centerY" secondItem="SI7-kj-PwW" secondAttribute="centerY" id="MGF-Zc-K2v"/>
@@ -1798,7 +1800,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PaE-WL-Hqq" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4929" y="80"/>
+            <point key="canvasLocation" x="4928.8000000000002" y="79.610194902548727"/>
         </scene>
         <!--Job Detail View Controller-->
         <scene sceneID="aPu-nH-2lJ">
@@ -2020,12 +2022,17 @@
                                     <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cLj-pn-IoH">
                                         <rect key="frame" x="17" y="17" width="293" height="96"/>
                                         <subviews>
-                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="jdfklfmd," textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="hdH-wq-qJ6">
+                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="hdH-wq-qJ6">
                                                 <rect key="frame" x="0.0" y="0.0" width="293" height="96"/>
-                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                <color key="backgroundColor" red="0.94509803921568625" green="0.96078431372549022" blue="0.97647058823529409" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <color key="textColor" systemColor="labelColor"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                                        <real key="value" value="20"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
                                             </textView>
                                         </subviews>
                                         <color key="backgroundColor" red="0.94509803921568625" green="0.96078431372549022" blue="0.97647058823529409" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
@@ -2096,6 +2103,7 @@
                     </view>
                     <connections>
                         <outlet property="addNoteButton" destination="CU3-Sa-kL3" id="Fdf-bs-nQD"/>
+                        <outlet property="noteTextView" destination="hdH-wq-qJ6" id="sT3-d5-8wM"/>
                         <outlet property="notesTableView" destination="tSQ-t4-tkW" id="iuq-Fm-d9T"/>
                     </connections>
                 </viewController>

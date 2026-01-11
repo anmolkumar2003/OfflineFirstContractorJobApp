@@ -1,9 +1,6 @@
-//
 //  NoteTableViewCell.swift
 //  OfflineFirstContractorJobApp
-//
 //  Created by mac on 10-01-2026.
-//
 
 import UIKit
 
@@ -12,7 +9,6 @@ class NoteTableViewCell: UITableViewCell {
     @IBOutlet weak var containerView: UIView!
     @IBOutlet weak var contentLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
-    //@IBOutlet weak var syncIndicatorView: UIView!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -20,13 +16,14 @@ class NoteTableViewCell: UITableViewCell {
     }
     
     private func setupUI() {
-//        containerView.layer.cornerRadius = 8
-//        containerView.layer.shadowColor = UIColor.black.cgColor
-//        containerView.layer.shadowOpacity = 0.05
-//        containerView.layer.shadowOffset = CGSize(width: 0, height: 1)
-//        containerView.layer.shadowRadius = 2
-//        
-        //syncIndicatorView.layer.cornerRadius = 4
+        containerView.applyGradient(
+            colors: [
+                UIColor(hex: "#3B82F6"),
+                UIColor(hex: "#00000000")
+            ],
+            startPoint: CGPoint(x: 0.5, y: 0.0),
+            endPoint: CGPoint(x: 0.5, y: 1.0)
+        )
     }
     
     func configure(with note: Note) {
@@ -39,16 +36,6 @@ class NoteTableViewCell: UITableViewCell {
         } else {
             dateLabel.text = "Pending"
         }
-        
-        // Sync indicator
-       // switch note.syncStatus {
-//        case .synced:
-//            syncIndicatorView.backgroundColor = UIColor(hex: "#10B981")
-//        case .pending:
-//            syncIndicatorView.backgroundColor = UIColor(hex: "#F59E0B")
-//        case .failed:
-//            syncIndicatorView.backgroundColor = UIColor(hex: "#EF4444")
-        //}
     }
     
     private func formatDate(_ dateString: String) -> String {

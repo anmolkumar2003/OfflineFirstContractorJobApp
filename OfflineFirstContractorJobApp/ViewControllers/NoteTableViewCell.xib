@@ -34,7 +34,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="MJb-Tz-9Pj">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="time" translatesAutoresizingMaskIntoConstraints="NO" id="MJb-Tz-9Pj">
                                 <rect key="frame" x="32" y="108.33333333333333" width="14" height="14"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="14" id="Cgs-a0-WVK"/>
@@ -61,8 +61,20 @@
                             <constraint firstItem="gyR-oT-zYh" firstAttribute="leading" secondItem="MT4-pW-P8I" secondAttribute="trailing" constant="28" id="yfU-TE-CzO"/>
                             <constraint firstItem="gyR-oT-zYh" firstAttribute="top" secondItem="MT4-pW-P8I" secondAttribute="top" id="zhh-D4-nCw"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                <real key="value" value="20"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                <color key="value" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
+                                <real key="value" value="1"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
                     <constraint firstAttribute="bottom" secondItem="rrA-HC-Oyv" secondAttribute="bottom" id="5BS-Uc-EOC"/>
                     <constraint firstAttribute="trailing" secondItem="rrA-HC-Oyv" secondAttribute="trailing" constant="24" id="7tW-vK-PbP"/>
@@ -80,8 +92,9 @@
         </tableViewCell>
     </objects>
     <resources>
+        <image name="time" width="14" height="14"/>
         <systemColor name="systemBlueColor">
-            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.53333333333333333" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
