@@ -50,23 +50,12 @@ enum SyncStatus: String, Codable {
 }
 
 struct JobRequest: Codable {
+    let clientJobId: String?
     let title: String
     let description: String?
     let clientName: String
     let city: String
     let budget: Double
-    let startDate: String?
+    let startDate: String
     let status: String
-    
-    enum CodingKeys: String, CodingKey {
-        case title
-        case description
-        case clientName = "client_name"
-        case city
-        case budget
-        case startDate = "start_date"
-        case status
-    }
 }
-
-

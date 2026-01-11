@@ -20,32 +20,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
 
-        // ✅ CHECK TOKEN
+        let rootVC: UIViewController
+
         if let token = UserDefaults.standard.string(forKey: "authToken"),
            !token.isEmpty {
 
-            // 👉 User already logged in
-            let homeVC = storyboard.instantiateViewController(
+            rootVC = storyboard.instantiateViewController(
                 withIdentifier: "DashboardViewController"
-            )
-            window?.rootViewController = UINavigationController(
-                rootViewController: homeVC
             )
 
         } else {
 
-            // 👉 User not logged in
-            let signInVC = storyboard.instantiateViewController(
-                withIdentifier: "SignInViewController"
-            )
-            window?.rootViewController = UINavigationController(
-                rootViewController: signInVC
+            rootVC = storyboard.instantiateViewController(
+                withIdentifier: "CreateAccountViewController"
             )
         }
 
+        let nav = UINavigationController(rootViewController: rootVC)
+        nav.setNavigationBarHidden(true, animated: false)
+
+        window?.rootViewController = nav
         window?.makeKeyAndVisible()
     }
 

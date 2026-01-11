@@ -77,11 +77,7 @@ class JobDetailViewController: UIViewController {
     private func setupUI() {
         jobTitleLabel.text = job.title
         clientNameLabel.text = job.clientName
-        
-        editButton.layer.cornerRadius = 8
-        editButton.layer.borderWidth = 1
-        editButton.layer.borderColor = UIColor(hex: "#3B82F6").cgColor
-        
+        editButton.layer.cornerRadius = 20
         // Update segmented control titles if needed
         if segmentedControl.numberOfSegments >= 3 {
             segmentedControl.setTitle("Overview", forSegmentAt: 0)

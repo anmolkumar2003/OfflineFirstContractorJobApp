@@ -1,202 +1,237 @@
-//
 //  SyncManager.swift
 //  OfflineFirstContractorJobApp
-//
 //  Created by mac on 10-01-2026.
-//
 
 import Foundation
 import Network
 
-class SyncManager {
+final class SyncManager {
+
     static let shared = SyncManager()
-    
+
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")
     private var isOnline = false
-    
+
     private init() {
         startMonitoring()
     }
-    
+
     // MARK: - Network Monitoring
-    
+
     private func startMonitoring() {
         monitor.pathUpdateHandler = { [weak self] path in
-            let wasOnline = self?.isOnline ?? false
-            self?.isOnline = path.status == .satisfied
-            
-            if self?.isOnline == true && !wasOnline {
-                // Just came online, trigger sync
+            guard let self else { return }
+
+            let wasOnline = self.isOnline
+            self.isOnline = path.status == .satisfied
+
+            if self.isOnline && !wasOnline {
                 DispatchQueue.main.async {
-                    self?.syncAll()
-                    NotificationCenter.default.post(name: NSNotification.Name("NetworkStatusChanged"), object: nil)
+                    self.syncAll()
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("NetworkStatusChanged"),
+                        object: true
+                    )
                 }
             }
-            
-            if self?.isOnline == false && wasOnline {
-                // Just went offline
+
+            if !self.isOnline && wasOnline {
                 DispatchQueue.main.async {
-                    NotificationCenter.default.post(name: NSNotification.Name("NetworkStatusChanged"), object: nil)
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("NetworkStatusChanged"),
+                        object: false
+                    )
                 }
             }
         }
+
         monitor.start(queue: queue)
-        
-        // Check initial status
         isOnline = monitor.currentPath.status == .satisfied
+
         if isOnline {
             syncAll()
         }
     }
-    
+
     func isNetworkAvailable() -> Bool {
         return isOnline
     }
-    
-    // MARK: - Sync Operations
-    
+
+    // MARK: - Sync Entry Point
+
     func syncAll() {
-        guard isNetworkAvailable() else { return }
-        
+        guard isOnline else { return }
+
         syncPendingJobs()
         syncPendingNotes()
         syncPendingVideos()
     }
-    
+
+    // MARK: - JOB SYNC
+
     private func syncPendingJobs() {
         let pendingJobs = LocalStorageManager.shared.getPendingJobs()
-        
+
         for job in pendingJobs {
+
             let jobRequest = JobRequest(
+                clientJobId: job.localId,
                 title: job.title,
                 description: job.description,
                 clientName: job.clientName,
                 city: job.city,
                 budget: job.budget,
-                startDate: job.startDate,
+                startDate: job.startDate ?? "",
                 status: job.status.rawValue
             )
-            
-            if let jobId = job.id {
-                // Update existing job
-                APIService.shared.updateJob(id: jobId, jobRequest) { [weak self] result in
-                    switch result {
-                    case .success(let updatedJob):
-                        var syncedJob = updatedJob
-                        syncedJob.syncStatus = .synced
-                        syncedJob.localId = job.localId
-                        LocalStorageManager.shared.saveJob(syncedJob)
-                        LocalStorageManager.shared.removePendingJob(localId: job.localId)
-                    case .failure:
-                        var failedJob = job
-                        failedJob.syncStatus = .failed
-                        LocalStorageManager.shared.saveJob(failedJob)
-                    }
-                }
-            } else {
-                // Create new job
-                APIService.shared.createJob(jobRequest) { [weak self] result in
-                    switch result {
-                    case .success(let createdJob):
-                        var syncedJob = createdJob
-                        syncedJob.localId = job.localId
-                        syncedJob.syncStatus = .synced
-                        LocalStorageManager.shared.saveJob(syncedJob)
-                        LocalStorageManager.shared.removePendingJob(localId: job.localId)
-                    case .failure:
-                        var failedJob = job
-                        failedJob.syncStatus = .failed
-                        LocalStorageManager.shared.saveJob(failedJob)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func syncPendingNotes() {
-        let pendingNotes = LocalStorageManager.shared.getPendingNotes()
-        
-        for note in pendingNotes {
-            if let noteId = note.id {
-                // Update existing note
-                APIService.shared.updateNote(jobId: note.jobId, noteId: noteId, content: note.content) { result in
-                    switch result {
-                    case .success(let updatedNote):
-                        var syncedNote = updatedNote
-                        syncedNote.localId = note.localId
-                        syncedNote.syncStatus = .synced
-                        LocalStorageManager.shared.saveNote(syncedNote)
-                        LocalStorageManager.shared.removePendingNote(localId: note.localId)
-                    case .failure:
-                        var failedNote = note
-                        failedNote.syncStatus = .failed
-                        LocalStorageManager.shared.saveNote(failedNote)
-                    }
-                }
-            } else {
-                // Create new note - need to get job server ID first
-                let jobs = LocalStorageManager.shared.getAllJobs()
-                if let job = jobs.first(where: { $0.localId == note.jobId || $0.id == note.jobId }) {
 
-                    let jobServerId = job.id ?? job.localId
-
-                    APIService.shared.createNote(jobId: jobServerId, content: note.content) { result in
+            // UPDATE
+            if let serverId = job.id {
+                APIService.shared.updateJob(id: serverId, jobRequest) { result in
+                    DispatchQueue.main.async {
                         switch result {
-                        case .success(let createdNote):
-                            var syncedNote = createdNote
-                            syncedNote.localId = note.localId
-                            syncedNote.syncStatus = .synced
-                            LocalStorageManager.shared.saveNote(syncedNote)
-                            LocalStorageManager.shared.removePendingNote(localId: note.localId)
+                        case .success(let updatedJob):
+                            var synced = updatedJob
+                            synced.localId = job.localId
+                            synced.syncStatus = .synced
+                            LocalStorageManager.shared.saveJob(synced)
 
                         case .failure:
-                            var failedNote = note
-                            failedNote.syncStatus = .failed
-                            LocalStorageManager.shared.saveNote(failedNote)
+                            var failed = job
+                            failed.syncStatus = .failed
+                            LocalStorageManager.shared.saveJob(failed)
+                        }
+                    }
+                }
+
+            }
+            // CREATE
+            else {
+                APIService.shared.createJob(jobRequest) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let createdJob):
+                            var synced = createdJob
+                            synced.localId = job.localId
+                            synced.syncStatus = .synced
+                            LocalStorageManager.shared.saveJob(synced)
+
+                        case .failure:
+                            var failed = job
+                            failed.syncStatus = .failed
+                            LocalStorageManager.shared.saveJob(failed)
                         }
                     }
                 }
             }
         }
     }
-    private func syncPendingVideos() {
-        let pendingVideos = LocalStorageManager.shared.getPendingVideos()
-        
-        for video in pendingVideos {
-            guard let videoURL = URL(string: video.videoPath),
-                  let videoData = try? Data(contentsOf: videoURL) else {
-                continue
-            }
-            
-            let jobs = LocalStorageManager.shared.getAllJobs()
+
+    // MARK: - NOTES SYNC
+
+    private func syncPendingNotes() {
+        let pendingNotes = LocalStorageManager.shared.getPendingNotes()
+        let jobs = LocalStorageManager.shared.getAllJobs()
+
+        for note in pendingNotes {
+
             guard let job = jobs.first(where: {
-                $0.localId == video.localJobId || $0.id == video.localJobId
-            }) else {
+                $0.localId == note.jobId || $0.id == note.jobId
+            }) else { continue }
+
+            guard let jobServerId = job.id else {
+                // Job not synced yet → wait
                 continue
             }
-            
-            let jobServerId = job.id ?? job.localId
-            
-            APIService.shared.uploadVideo(jobId: jobServerId, videoData: videoData) { result in
-                switch result {
-                case .success:
-                    LocalStorageManager.shared.removePendingVideo(localId: video.localId)
-                case .failure:
-                    // Keep video in pending for retry
-                    break
+
+            // UPDATE
+            if let noteId = note.id {
+                APIService.shared.updateNote(
+                    jobId: jobServerId,
+                    noteId: noteId,
+                    content: note.content
+                ) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let updated):
+                            var synced = updated
+                            synced.localId = note.localId
+                            synced.syncStatus = .synced
+                            LocalStorageManager.shared.saveNote(synced)
+
+                        case .failure:
+                            var failed = note
+                            failed.syncStatus = .failed
+                            LocalStorageManager.shared.saveNote(failed)
+                        }
+                    }
+                }
+
+            }
+            // CREATE
+            else {
+                APIService.shared.createNote(
+                    jobId: jobServerId,
+                    content: note.content
+                ) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let created):
+                            var synced = created
+                            synced.localId = note.localId
+                            synced.syncStatus = .synced
+                            LocalStorageManager.shared.saveNote(synced)
+
+                        case .failure:
+                            var failed = note
+                            failed.syncStatus = .failed
+                            LocalStorageManager.shared.saveNote(failed)
+                        }
+                    }
                 }
             }
         }
     }
 
-    
-    // MARK: - Manual Sync Trigger
-    
-    func triggerSync() {
-        if isNetworkAvailable() {
-            syncAll()
+    // MARK: - VIDEOS SYNC
+
+    private func syncPendingVideos() {
+        let pendingVideos = LocalStorageManager.shared.getPendingVideos()
+        let jobs = LocalStorageManager.shared.getAllJobs()
+
+        for video in pendingVideos {
+
+            guard let job = jobs.first(where: {
+                $0.localId == video.localJobId || $0.id == video.localJobId
+            }),
+            let jobServerId = job.id,
+            let videoURL = URL(string: video.videoPath),
+            let videoData = try? Data(contentsOf: videoURL)
+            else { continue }
+
+            APIService.shared.uploadVideo(
+                jobId: jobServerId,
+                videoData: videoData
+            ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success:
+                        LocalStorageManager.shared.removePendingVideo(
+                            localId: video.localId
+                        )
+                    case .failure:
+                        break // retry later
+                    }
+                }
+            }
         }
     }
-}
 
+    // MARK: - Manual Trigger
+
+    func triggerSync() {
+        guard isOnline else { return }
+        syncAll()
+    }
+}

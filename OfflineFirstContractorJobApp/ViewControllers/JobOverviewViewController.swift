@@ -9,8 +9,6 @@ import UIKit
 
 class JobOverviewViewController: UIViewController {
     @IBOutlet weak var budgetView: UIView!
-    
-    @IBOutlet weak var statusView: UIView!
     @IBOutlet weak var statusLabel: UILabel!
     @IBOutlet weak var budgetLabel: UILabel!
     @IBOutlet weak var locationLabel: UILabel!
@@ -20,7 +18,7 @@ class JobOverviewViewController: UIViewController {
     @IBOutlet weak var scrollView: UIScrollView!
     
     var job: Job!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         loadJob()
@@ -37,6 +35,8 @@ class JobOverviewViewController: UIViewController {
             startPoint: CGPoint(x: 0, y: 0),
             endPoint: CGPoint(x: 1, y: 1)
         )
+        budgetView.cornerRadius = 20
+        budgetView.layer.masksToBounds = true
     }
 
     func refreshData() {
@@ -68,17 +68,12 @@ class JobOverviewViewController: UIViewController {
         // Status color
         switch job.status {
         case .active:
-            statusView.backgroundColor = UIColor(hex: "#10B981", alpha: 0.2)
             statusLabel.textColor = UIColor(hex: "#10B981")
         case .pending:
-            statusView.backgroundColor = UIColor(hex: "#F59E0B", alpha: 0.2)
             statusLabel.textColor = UIColor(hex: "#F59E0B")
         case .completed:
-            statusView.backgroundColor = UIColor(hex: "#3B82F6", alpha: 0.2)
             statusLabel.textColor = UIColor(hex: "#3B82F6")
         }
-        
-        statusView.layer.cornerRadius = 8
     }
 }
 

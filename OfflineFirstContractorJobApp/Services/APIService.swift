@@ -133,20 +133,30 @@ class APIService {
                     return
                 }
 
-                guard let data = data else {
-                    completion(.failure(NSError(domain: "No data", code: -1)))
+                guard let httpResponse = response as? HTTPURLResponse,
+                      let data = data else {
+                    completion(.failure(NSError(domain: "Invalid response", code: -1)))
                     return
                 }
 
-                do {
-                    let apiResponse = try JSONDecoder().decode(AuthAPIResponse.self, from: data)
+                print("⬅️ Login Status:", httpResponse.statusCode)
+                print("⬅️ Login Response:", String(data: data, encoding: .utf8) ?? "")
 
-                    // ✅ SAVE TOKEN
-                    UserDefaults.standard.set(apiResponse.data.token, forKey: "authToken")
+                if httpResponse.statusCode == 200 {
+                    do {
+                        let apiResponse = try JSONDecoder().decode(AuthAPIResponse.self, from: data)
 
-                    completion(.success(apiResponse.data))
-                } catch {
-                    completion(.failure(error))
+                        // ✅ SAVE TOKEN ONLY ON SUCCESS
+                        UserDefaults.standard.set(apiResponse.data.token, forKey: "authToken")
+
+                        completion(.success(apiResponse.data))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                } else {
+                    completion(.failure(
+                        NSError(domain: "Login failed", code: httpResponse.statusCode)
+                    ))
                 }
 
             }.resume()
@@ -163,36 +173,49 @@ class APIService {
             completion(.failure(NSError(domain: "Invalid URL", code: -1)))
             return
         }
-        
+
         let request = createRequest(url: url, method: "GET")
-        
+
         session.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
-            
+
             guard let data = data else {
                 completion(.failure(NSError(domain: "No data", code: -1)))
                 return
             }
-            
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode == 200 {
-                    do {
-                        let jobs = try JSONDecoder().decode([Job].self, from: data)
-                        completion(.success(jobs))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else if httpResponse.statusCode == 401 {
-                    completion(.failure(NSError(domain: "Unauthorized", code: 401)))
-                } else {
-                    completion(.failure(NSError(domain: "HTTP Error", code: httpResponse.statusCode)))
-                }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(NSError(domain: "Invalid response", code: -1)))
+                return
             }
+
+            // 🔍 DEBUG LOGS (VERY IMPORTANT)
+            print("⬅️ STATUS:", httpResponse.statusCode)
+            print("⬅️ RESPONSE:", String(data: data, encoding: .utf8) ?? "nil")
+
+            switch httpResponse.statusCode {
+            case 200:
+                do {
+                    let jobs = try JSONDecoder().decode([Job].self, from: data)
+                    completion(.success(jobs))
+                } catch {
+                    completion(.failure(error))
+                }
+
+            case 401:
+                completion(.failure(NSError(domain: "Unauthorized", code: 401)))
+
+            default:
+                let message = String(data: data, encoding: .utf8) ?? "Server error"
+                completion(.failure(NSError(domain: message, code: httpResponse.statusCode)))
+            }
+
         }.resume()
     }
+
     
     func createJob(_ job: JobRequest, completion: @escaping (Result<Job, Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/api/v1/jobs") else {
