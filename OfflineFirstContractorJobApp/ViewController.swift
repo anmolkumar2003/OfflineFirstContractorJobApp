@@ -21,15 +21,6 @@ class ViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-//        parentView.applyGradient(
-//            colors: [
-//                UIColor(hex: "#0F172A"),
-//                UIColor(hex: "#1E293B"),
-//                UIColor(hex: "#0F172A")
-//            ]
-//        )
-//
         parentView.applyGradient(
             colors: [
                 UIColor(hex: "#0F172A"),   // top
@@ -55,10 +46,14 @@ class ViewController: UIViewController {
     }
     @IBAction func signInAccountBtn(_ sender: Any) {
         let vc = UIStoryboard(name: "Main", bundle: nil)
-                .instantiateViewController(withIdentifier: "CreateAccountViewController") as! CreateAccountViewController
+                .instantiateViewController(withIdentifier: "SignInViewController") as! SignInViewController
 
             self.navigationController?.pushViewController(vc, animated: true)
     }
     @IBAction func createAccountBtnAction(_ sender: Any) {
+        let vc = UIStoryboard(name: "Main", bundle: nil)
+                .instantiateViewController(withIdentifier: "CreateAccountViewController") as! CreateAccountViewController
+
+            self.navigationController?.pushViewController(vc, animated: true)
     }
 }

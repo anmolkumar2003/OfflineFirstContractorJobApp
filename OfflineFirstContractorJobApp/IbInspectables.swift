@@ -1,62 +1,80 @@
+//  IbInspectables.swift
+//  Created by Anmol.
+
 import UIKit
 
-@IBDesignable
-class IBInspectableView: UIView {
-
-    // MARK: - Corner Radius
-    @IBInspectable var cornerRadius: CGFloat = 0 {
+extension UIView{
+@IBInspectable var cornerRadius: Double {
+             get {
+               return Double(self.layer.cornerRadius)
+             }set {
+               self.layer.cornerRadius = CGFloat(newValue)
+             }
+        }
+        @IBInspectable var borderWidth: Double {
+              get {
+                return Double(self.layer.borderWidth)
+              }
+              set {
+               self.layer.borderWidth = CGFloat(newValue)
+              }
+        }
+        @IBInspectable var borderColor: UIColor? {
+             get {
+                return UIColor(cgColor: self.layer.borderColor!)
+             }
+             set {
+                self.layer.borderColor = newValue?.cgColor
+             }
+        }
+        @IBInspectable
+        var shadowColor: UIColor? {
+            get {
+               return UIColor(cgColor: self.layer.shadowColor!)
+            }
+            set {
+               self.layer.shadowColor = newValue?.cgColor
+            }
+        }
+        @IBInspectable
+        var shadowOpacity: Float {
+            get {
+               return self.layer.shadowOpacity
+            }
+            set {
+               self.layer.shadowOpacity = newValue
+           }
+        }
+     
+    }
+@IBDesignable class TextViewWithInsets: UITextView {
+ 
+    @IBInspectable
+    var topInset: CGFloat = 0 {
         didSet {
-            layer.cornerRadius = cornerRadius
-            layer.masksToBounds = cornerRadius > 0
+            self.contentInset = UIEdgeInsets(top: topInset, left: self.contentInset.left, bottom: self.contentInset.bottom, right: self.contentInset.right)
         }
     }
-
-    // MARK: - Border
-    @IBInspectable var borderWidth: CGFloat = 0 {
+ 
+    @IBInspectable
+    var bottmInset: CGFloat = 0 {
         didSet {
-            layer.borderWidth = borderWidth
+            self.contentInset = UIEdgeInsets(top: self.contentInset.top, left: self.contentInset.left, bottom: bottmInset, right: self.contentInset.right)
         }
     }
-
-    @IBInspectable var borderColor: UIColor = .clear {
+ 
+    @IBInspectable
+    var leftInset: CGFloat = 0 {
         didSet {
-            layer.borderColor = borderColor.cgColor
+            self.contentInset = UIEdgeInsets(top: self.contentInset.top, left: leftInset, bottom: self.contentInset.bottom, right: self.contentInset.right)
         }
     }
-
-    // MARK: - Shadow
-    @IBInspectable var shadowColor: UIColor = .clear {
+ 
+    @IBInspectable
+    var rightInset: CGFloat = 0 {
         didSet {
-            layer.shadowColor = shadowColor.cgColor
+            self.contentInset = UIEdgeInsets(top: self.contentInset.top, left: self.contentInset.left, bottom: self.contentInset.bottom, right: rightInset)
         }
-    }
-
-    @IBInspectable var shadowOpacity: Float = 0 {
-        didSet {
-            layer.shadowOpacity = shadowOpacity
-        }
-    }
-
-    @IBInspectable var shadowOffsetX: CGFloat = 0 {
-        didSet {
-            layer.shadowOffset.width = shadowOffsetX
-        }
-    }
-
-    @IBInspectable var shadowOffsetY: CGFloat = 0 {
-        didSet {
-            layer.shadowOffset.height = shadowOffsetY
-        }
-    }
-
-    @IBInspectable var shadowRadius: CGFloat = 0 {
-        didSet {
-            layer.shadowRadius = shadowRadius
-        }
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        layer.masksToBounds = false
     }
 }
+ 

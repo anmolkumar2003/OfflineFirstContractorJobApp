@@ -12,12 +12,43 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+
+        window = UIWindow(windowScene: windowScene)
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+
+        // ✅ CHECK TOKEN
+        if let token = UserDefaults.standard.string(forKey: "authToken"),
+           !token.isEmpty {
+
+            // 👉 User already logged in
+            let homeVC = storyboard.instantiateViewController(
+                withIdentifier: "DashboardViewController"
+            )
+            window?.rootViewController = UINavigationController(
+                rootViewController: homeVC
+            )
+
+        } else {
+
+            // 👉 User not logged in
+            let signInVC = storyboard.instantiateViewController(
+                withIdentifier: "SignInViewController"
+            )
+            window?.rootViewController = UINavigationController(
+                rootViewController: signInVC
+            )
+        }
+
+        window?.makeKeyAndVisible()
     }
+
 
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
@@ -39,6 +70,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
+        // Trigger sync when app comes to foreground
+        SyncManager.shared.triggerSync()
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
