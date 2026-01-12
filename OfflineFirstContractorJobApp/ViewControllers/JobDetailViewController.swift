@@ -84,36 +84,68 @@ class JobDetailViewController: UIViewController {
         statusView.layer.masksToBounds = false
     }
     
-    //  Setup text segmented control
+    //  Setup segmented control with icons
     private func setupSegmentedControl() {
         segmentedControl.removeAllSegments()
         
-        let segments = ["Overview", "Notes", "Video"]
+        let segments: [(icon: String, title: String)] = [
+            ("doc.text.fill", "Overview"),
+            ("note.text", "Notes"),
+            ("video.fill", "Video")
+        ]
         
-        for (index, title) in segments.enumerated() {
-            segmentedControl.insertSegment(withTitle: title, at: index, animated: false)
+        for (index, segment) in segments.enumerated() {
+            let isSelected = index == 0
+            let iconColor = isSelected ? UIColor(hex: "#3B82F6") : UIColor(hex: "#64748B")
+            let icon = UIImage(systemName: segment.icon, withConfiguration: UIImage.SymbolConfiguration(pointSize: 16, weight: .medium))
+            let tintedIcon = icon?.withTintColor(iconColor, renderingMode: .alwaysOriginal)
+            let imageWithText = createImageWithText(icon: tintedIcon, text: segment.title, isSelected: isSelected)
+            segmentedControl.insertSegment(with: imageWithText, at: index, animated: false)
         }
         
         segmentedControl.selectedSegmentIndex = 0
+        segmentedControl.backgroundColor = UIColor(hex: "#F1F5F9")
         
         if #available(iOS 13.0, *) {
-            segmentedControl.selectedSegmentTintColor = UIColor(hex: "#FFFFFF")
-            
-            // Selected text
-            segmentedControl.setTitleTextAttributes([
-                .foregroundColor: UIColor(hex: "#3B82F6"),
-                .font: UIFont.systemFont(ofSize: 14, weight: .semibold)
-            ], for: .selected)
-            
-            // Deselected text
-            segmentedControl.setTitleTextAttributes([
-                .foregroundColor: UIColor(hex: "#64748B"),
-                .font: UIFont.systemFont(ofSize: 14, weight: .regular)
-            ], for: .normal)
-            
-            // Rounded corners for selected segment
-            segmentedControl.layer.cornerRadius = 16
+            segmentedControl.selectedSegmentTintColor = UIColor.white
+            segmentedControl.layer.cornerRadius = 12
             segmentedControl.clipsToBounds = true
+        }
+        
+        segmentedControl.setDividerImage(UIImage(), forLeftSegmentState: .normal, rightSegmentState: .normal, barMetrics: .default)
+    }
+    
+    private func createImageWithText(icon: UIImage?, text: String, isSelected: Bool) -> UIImage? {
+        let iconSize: CGFloat = 18
+        let textSize: CGFloat = 14
+        let spacing: CGFloat = 6
+        let padding: CGFloat = 12
+        
+        let textColor = isSelected ? UIColor(hex: "#3B82F6") : UIColor(hex: "#64748B")
+        let font = isSelected ? UIFont.systemFont(ofSize: textSize, weight: .semibold) : UIFont.systemFont(ofSize: textSize, weight: .regular)
+        
+        let textAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: textColor
+        ]
+        let textSize_actual = (text as NSString).size(withAttributes: textAttributes)
+        
+        let totalWidth = iconSize + spacing + textSize_actual.width + (padding * 2)
+        let totalHeight = max(iconSize, textSize_actual.height) + (padding * 2)
+        
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: totalWidth, height: totalHeight))
+        return renderer.image { context in
+            var currentX: CGFloat = padding
+            
+            if let icon = icon {
+                let iconY = (totalHeight - iconSize) / 2
+                let iconRect = CGRect(x: currentX, y: iconY, width: iconSize, height: iconSize)
+                icon.draw(in: iconRect)
+                currentX += iconSize + spacing
+            }
+            let textY = (totalHeight - textSize_actual.height) / 2
+            let textRect = CGRect(x: currentX, y: textY, width: textSize_actual.width, height: textSize_actual.height)
+            (text as NSString).draw(in: textRect, withAttributes: textAttributes)
         }
     }
     
@@ -176,6 +208,8 @@ class JobDetailViewController: UIViewController {
     }
     
     @IBAction func segmentedControlChanged(_ sender: UISegmentedControl) {
+        updateSegmentImages()
+        
         switch sender.selectedSegmentIndex {
         case 0:
             showOverview()
@@ -185,6 +219,24 @@ class JobDetailViewController: UIViewController {
             showVideo()
         default:
             break
+        }
+    }
+    
+    private func updateSegmentImages() {
+        let segments: [(icon: String, title: String)] = [
+            ("doc.text.fill", "Overview"),
+            ("note.text", "Notes"),
+            ("video.fill", "Video")
+        ]
+        
+        for (index, segment) in segments.enumerated() {
+            let isSelected = segmentedControl.selectedSegmentIndex == index
+            let iconColor = isSelected ? UIColor(hex: "#3B82F6") : UIColor(hex: "#64748B")
+            let icon = UIImage(systemName: segment.icon, withConfiguration: UIImage.SymbolConfiguration(pointSize: 16, weight: .medium))
+            let tintedIcon = icon?.withTintColor(iconColor, renderingMode: .alwaysOriginal)
+            
+            let imageWithText = createImageWithText(icon: tintedIcon, text: segment.title, isSelected: isSelected)
+            segmentedControl.setImage(imageWithText, forSegmentAt: index)
         }
     }
     
