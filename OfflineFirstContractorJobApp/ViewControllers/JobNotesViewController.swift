@@ -45,7 +45,7 @@ class JobNotesViewController: UIViewController {
                         for note in serverNotes {
                             LocalStorageManager.shared.saveNote(note)
                         }
-                        self?.loadNotes() // Reload after syncing
+                        self?.loadNotes()
                     case .failure:
                         break
                     }

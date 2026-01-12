@@ -1,9 +1,6 @@
-//
 //  JobOverviewViewController.swift
 //  OfflineFirstContractorJobApp
-//
 //  Created by mac on 10-01-2026.
-//
 
 import UIKit
 
@@ -23,10 +20,10 @@ class JobOverviewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         loadJob()
-        statusVew.layer.shadowColor = UIColor(hex: "#0000001A").cgColor  // Your color with opacity
+        statusVew.layer.shadowColor = UIColor(hex: "#0000001A").cgColor
         statusVew.layer.shadowOpacity = 0.1
-        statusVew.layer.shadowRadius = 4      // Adjust for blur
-        statusVew.layer.shadowOffset = CGSize(width: 0, height: 0) // Centered shadow
+        statusVew.layer.shadowRadius = 4
+        statusVew.layer.shadowOffset = CGSize(width: 0, height: 0)
         statusVew.layer.masksToBounds = false
     }
     

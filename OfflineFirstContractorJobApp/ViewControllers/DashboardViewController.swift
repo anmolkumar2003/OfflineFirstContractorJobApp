@@ -131,10 +131,15 @@ class DashboardViewController: UIViewController {
                     for serverJob in serverJobs {
                         guard let serverId = serverJob.id else { continue }
 
+                        // First check by server ID
                         if let existingJob = LocalStorageManager.shared.getJob(serverId: serverId) {
                             var updatedJob = serverJob
                             updatedJob.localId = existingJob.localId
-                            updatedJob.syncStatus = existingJob.syncStatus
+                            if existingJob.syncStatus == .pending {
+                                updatedJob.syncStatus = .pending
+                            } else {
+                                updatedJob.syncStatus = .synced
+                            }
                             LocalStorageManager.shared.saveJob(updatedJob)
                         } else {
                             var jobToSave = serverJob
@@ -151,16 +156,34 @@ class DashboardViewController: UIViewController {
                     let nsError = error as NSError
 
                     guard !self.isShowingErrorAlert else { return }
+                    
+                    if !NetworkManager.shared.isConnected {
+                        return
+                    }
+                    
                     self.isShowingErrorAlert = true
 
                     let message: String
                     switch nsError.code {
                     case 401:
+                        // Unauthorized - clear auth and logout
                         message = "Session expired. Please login again."
+                        UserDefaults.standard.removeObject(forKey: "authToken")
+                        UserDefaults.standard.set(false, forKey: "isLoggedIn")
+                        UserDefaults.standard.synchronize()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            self.logout()
+                        }
                     case 500:
                         message = "Server error. Try again later."
                     default:
-                        message = nsError.domain
+                        // Only show error if it's a meaningful error code
+                        let networkErrorCodes = [-1001, -1009, -1004, -1005, -1006]
+                        if networkErrorCodes.contains(nsError.code) {
+                            self.isShowingErrorAlert = false
+                            return
+                        }
+                        message = nsError.domain.isEmpty ? "An error occurred" : nsError.domain
                     }
 
                     self.showErrorAlert(message: message) {

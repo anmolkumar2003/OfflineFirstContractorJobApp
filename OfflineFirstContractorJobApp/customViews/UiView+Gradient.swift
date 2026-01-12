@@ -52,8 +52,23 @@ extension UIButton {
         cornerRadius: CGFloat = 16,
         shadowColor: UIColor? = nil
     ) {
+        // Check if gradient already exists
+        if let existingGradient = layer.sublayers?.first(where: { $0.name == "buttonGradient" }) as? CAGradientLayer {
+            // Update existing gradient frame and colors
+            existingGradient.frame = bounds
+            existingGradient.colors = colors.map { $0.cgColor }
+            existingGradient.cornerRadius = cornerRadius
+            // Update shadow path if shadow exists
+            if shadowColor != nil {
+                layer.shadowPath = UIBezierPath(
+                    roundedRect: bounds,
+                    cornerRadius: cornerRadius
+                ).cgPath
+            }
+            return
+        }
 
-        // Remove existing gradient
+        // Remove any existing gradient layers (safety check)
         layer.sublayers?
             .filter { $0.name == "buttonGradient" }
             .forEach { $0.removeFromSuperlayer() }

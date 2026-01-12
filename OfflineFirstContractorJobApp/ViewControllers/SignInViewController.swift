@@ -1,42 +1,39 @@
-//  CreateAccountViewController.swift
+//  SignInViewController.swift
 //  OfflineFirstContractorJobApp
 //  Created by mac on 10-01-2026.
 
 import UIKit
 
-class CreateAccountViewController: UIViewController {
+class SignInViewController: UIViewController {
     
-    @IBOutlet weak var createAccountBtn: UIButton!
-    @IBOutlet weak var backBtnView: UIView!
-    @IBOutlet weak var fullNameTf: UITextField!
     @IBOutlet weak var encryptionImg: UIImageView!
+    @IBOutlet weak var signInBtn: UIButton!
+    @IBOutlet weak var backBtnView: UIView!
     @IBOutlet weak var passwordTf: UITextField!
     @IBOutlet weak var passwordView: UIView!
     @IBOutlet weak var emailTf: UITextField!
     @IBOutlet weak var emailView: UIView!
-    @IBOutlet weak var fullNameView: UIView!
-    
     private var isPasswordVisible = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         backBtnView.layer.cornerRadius = 40/2
         let borderColor = UIColor.black.withAlphaComponent(0.0).cgColor
-
-        [emailView, fullNameView, passwordView].forEach { view in
+        
+        [emailView, passwordView].forEach { view in
             view?.layer.cornerRadius = 16
             view?.layer.borderWidth = 2
             view?.layer.borderColor = borderColor
             view?.clipsToBounds = true
         }
-        createAccountBtn.layer.cornerRadius = 16
+        
+        
         backBtnView.layer.shadowColor =
-            UIColor.black.withAlphaComponent(0.1).cgColor   // #0000001A
+        UIColor.black.withAlphaComponent(0.1).cgColor
         backBtnView.layer.shadowOpacity = 1
         backBtnView.layer.shadowRadius = 12
         backBtnView.layer.shadowOffset = CGSize(width: 0, height: 4)
         backBtnView.layer.masksToBounds = false
-        
         passwordTf.isSecureTextEntry = true
         
         // Add tap gesture to password visibility toggle
@@ -60,15 +57,14 @@ class CreateAccountViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-
-        createAccountBtn.applyGradient(
-                colors: [
-                    UIColor(hex: "#3B82F6"),
-                    UIColor(hex: "#2563EB")
-                ],
-                cornerRadius: 16,
-                shadowColor: UIColor(hex: "#3B82F6", alpha: 0.2)
-            )
+        signInBtn.applyGradient(
+            colors: [
+                UIColor(hex: "#3B82F6"),
+                UIColor(hex: "#2563EB")
+            ],
+            cornerRadius: 16,
+            shadowColor: UIColor(hex: "#3B82F6", alpha: 0.2)
+        )
     }
     
     private func showAlert(title: String, message: String) {
@@ -78,11 +74,6 @@ class CreateAccountViewController: UIViewController {
     }
     
     private func validateInputs() -> Bool {
-        guard let name = fullNameTf.text?.trimmingCharacters(in: .whitespaces), !name.isEmpty else {
-            showAlert(title: "Error", message: "Please enter your full name")
-            return false
-        }
-        
         guard let email = emailTf.text?.trimmingCharacters(in: .whitespaces), !email.isEmpty else {
             showAlert(title: "Error", message: "Please enter your email address")
             return false
@@ -98,11 +89,6 @@ class CreateAccountViewController: UIViewController {
             return false
         }
         
-        guard password.count >= 8 else {
-            showAlert(title: "Error", message: "Password must be at least 8 characters")
-            return false
-        }
-        
         return true
     }
     
@@ -111,81 +97,117 @@ class CreateAccountViewController: UIViewController {
         let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
         return emailPredicate.evaluate(with: email)
     }
-
+    
+    @IBAction func backBtn(_ sender: UIButton) {
+        navigationController?.popViewController(animated: true)
+    }
+    
     @IBAction func createAccountBtn(_ sender: UIButton) {
+        let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "CreateAccountViewController") as! CreateAccountViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @IBAction func forgotPasswordBtn(_ sender: UIButton) {
+        showAlert(title: "Forgot Password", message: "Please contact support to reset your password.")
+    }
+    
+    @IBAction func signInBtnAction(_ sender: UIButton) {
         guard validateInputs() else { return }
         
-        createAccountBtn.isEnabled = false
+        signInBtn.isEnabled = false
         let activityIndicator = UIActivityIndicatorView(style: .medium)
-        activityIndicator.center = createAccountBtn.center
+        activityIndicator.center = signInBtn.center
         view.addSubview(activityIndicator)
         activityIndicator.startAnimating()
         
-        APIService.shared.signup(
-            name: fullNameTf.text!.trimmingCharacters(in: .whitespaces),
+        APIService.shared.login(
             email: emailTf.text!.trimmingCharacters(in: .whitespaces),
             password: passwordTf.text!
         ) { [weak self] result in
             DispatchQueue.main.async {
                 activityIndicator.stopAnimating()
                 activityIndicator.removeFromSuperview()
-                self?.createAccountBtn.isEnabled = true
+                self?.signInBtn.isEnabled = true
                 
                 switch result {
-                case .success(let authResponse):
-                    // Save user name
-                    UserDefaults.standard.set(self?.fullNameTf.text?.trimmingCharacters(in: .whitespaces), forKey: "userName")
+                case .success(let userData):
+                    let previousUserId = UserDefaults.standard.string(forKey: "userId")
+                    if let previousUserId = previousUserId, previousUserId != userData.id {
+                        LocalStorageManager.shared.clearAllData()
+                    }
                     
                     // Navigate to dashboard
                     let storyboard = UIStoryboard(name: "Main", bundle: nil)
                     if let dashboardVC = storyboard.instantiateViewController(withIdentifier: "DashboardViewController") as? DashboardViewController {
                         let navController = UINavigationController(rootViewController: dashboardVC)
                         navController.modalPresentationStyle = .fullScreen
-                        self?.present(navController, animated: true)
+                        
+                        // Set as root view controller
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let window = windowScene.windows.first {
+                            window.rootViewController = navController
+                            window.makeKeyAndVisible()
+                        } else {
+                            self?.present(navController, animated: true)
+                        }
                     }
                 case .failure(let error):
-                    self?.showAlert(title: "Error", message: error.localizedDescription)
+                    let errorMessage = (error as NSError).code == 401 ? "Invalid email or password" : error.localizedDescription
+                    self?.showAlert(title: "Error", message: errorMessage)
                 }
             }
         }
     }
+}
+
+extension SignInViewController {
     
-    @IBAction func signInBtn(_ sender: UIButton) {
-        let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SignInViewController") as! SignInViewController
-        self.navigationController?.pushViewController(vc, animated: true)
+    func handleSuccessfulLogin(userData: AuthUserData) {
+        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+        UserDefaults.standard.set(userData.name, forKey: "userName")
+        UserDefaults.standard.synchronize()
+        navigateToDashboard()
     }
     
-    @IBAction func backBtn(_ sender: UIButton) {
-        navigationController?.popViewController(animated: true)
+    private func navigateToDashboard() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let dashboardVC = storyboard.instantiateViewController(withIdentifier: "DashboardViewController") as? DashboardViewController {
+            let navigationController = UINavigationController(rootViewController: dashboardVC)
+            navigationController.modalPresentationStyle = .fullScreen
+            
+            // Set as root view controller
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = navigationController
+                window.makeKeyAndVisible()
+                UIView.transition(with: window,
+                                  duration: 0.3,
+                                  options: .transitionCrossDissolve,
+                                  animations: nil)
+            }
+        }
     }
 }
 
-extension CreateAccountViewController {
+// MARK: - Logout Helper (Add to any ViewController that needs logout)
+
+extension UIViewController {
     
-    func handleSuccessfulSignup() {
-        // After signup, navigate to login screen
-        // OR auto-login if your API returns a token on signup
+    func logout() {
+        // Clear all user data
+        UserDefaults.standard.removeObject(forKey: "authToken")
+        UserDefaults.standard.removeObject(forKey: "userName")
+        UserDefaults.standard.removeObject(forKey: "userEmail")
+        UserDefaults.standard.removeObject(forKey: "userId")
+        UserDefaults.standard.set(false, forKey: "isLoggedIn")
+        UserDefaults.standard.synchronize()
         
-        let alert = UIAlertController(
-            title: "Success",
-            message: "Account created successfully! Please login.",
-            preferredStyle: .alert
-        )
+        // Clear all local data (jobs, notes, videos)
+        LocalStorageManager.shared.clearAllData()
         
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-            self?.navigateToLogin()
-        })
-        
-        present(alert, animated: true)
-    }
-    
-    private func navigateToLogin() {
-        // Pop back to login screen
-        navigationController?.popViewController(animated: true)
-        
-        // OR navigate to login if you're not using navigation controller
+        // Navigate to login
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let loginVC = storyboard.instantiateViewController(withIdentifier: "SignInViewController") as? UIViewController {
+        if let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as? UIViewController {
             let navigationController = UINavigationController(rootViewController: loginVC)
             navigationController.modalPresentationStyle = .fullScreen
             
@@ -193,6 +215,11 @@ extension CreateAccountViewController {
                let window = windowScene.windows.first {
                 window.rootViewController = navigationController
                 window.makeKeyAndVisible()
+                
+                UIView.transition(with: window,
+                                  duration: 0.3,
+                                  options: .transitionCrossDissolve,
+                                  animations: nil)
             }
         }
     }

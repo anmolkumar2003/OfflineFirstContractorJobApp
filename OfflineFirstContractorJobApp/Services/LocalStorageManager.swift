@@ -202,4 +202,15 @@ class LocalStorageManager {
             UserDefaults.standard.set(data, forKey: pendingVideosKey)
         }
     }
+    
+    // MARK: - Clear All Data (for logout/new account)
+    
+    func clearAllData() {
+        UserDefaults.standard.removeObject(forKey: jobsKey)
+        UserDefaults.standard.removeObject(forKey: notesKey)
+        UserDefaults.standard.removeObject(forKey: pendingJobsKey)
+        UserDefaults.standard.removeObject(forKey: pendingNotesKey)
+        UserDefaults.standard.removeObject(forKey: pendingVideosKey)
+        UserDefaults.standard.synchronize()
+    }
 }

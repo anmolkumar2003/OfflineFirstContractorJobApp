@@ -74,7 +74,6 @@
 				D850FC7AF98D50933B008FB7 /* Pods-OfflineFirstContractorJobApp.debug.xcconfig */,
 				3FC475F8B6A4E6106D2B64EF /* Pods-OfflineFirstContractorJobApp.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -186,9 +185,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-OfflineFirstContractorJobApp/Pods-OfflineFirstContractorJobApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-OfflineFirstContractorJobApp/Pods-OfflineFirstContractorJobApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

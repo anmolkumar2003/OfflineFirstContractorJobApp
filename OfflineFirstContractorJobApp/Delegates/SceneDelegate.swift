@@ -24,15 +24,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let rootVC: UIViewController
 
-        if let token = UserDefaults.standard.string(forKey: "authToken"),
-           !token.isEmpty {
+        // Check both token and isLoggedIn flag
+        let isLoggedIn = UserDefaults.standard.bool(forKey: "isLoggedIn")
+        let hasToken = UserDefaults.standard.string(forKey: "authToken")?.isEmpty == false
 
+        if isLoggedIn && hasToken {
             rootVC = storyboard.instantiateViewController(
                 withIdentifier: "DashboardViewController"
             )
-
         } else {
-
+            // Clear any stale data if not logged in
+            if !isLoggedIn {
+                LocalStorageManager.shared.clearAllData()
+            }
             rootVC = storyboard.instantiateViewController(
                 withIdentifier: "ViewController"
             )

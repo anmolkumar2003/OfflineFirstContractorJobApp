@@ -59,8 +59,8 @@ class APIService {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = bodyData
 
-            print("➡️ Signup URL:", url.absoluteString)
-            print("➡️ Body:", String(data: bodyData, encoding: .utf8) ?? "")
+            print("Signup URL:", url.absoluteString)
+            print("Body:", String(data: bodyData, encoding: .utf8) ?? "")
 
             session.dataTask(with: request) { data, response, error in
 
@@ -74,14 +74,34 @@ class APIService {
                     return
                 }
 
-                print("⬅️ Status:", httpResponse.statusCode)
+                print("Status:", httpResponse.statusCode)
                 if let data = data {
-                    print("⬅️ Response:", String(data: data, encoding: .utf8) ?? "")
+                    print("Response:", String(data: data, encoding: .utf8) ?? "")
                 }
 
                 if httpResponse.statusCode == 200 || httpResponse.statusCode == 201 {
-                    // ✅ Signup successful (NO TOKEN HERE)
-                    completion(.success(()))
+                    // Try to parse response - some APIs return token on signup
+                    if let data = data {
+                        do {
+                            let apiResponse = try JSONDecoder().decode(AuthAPIResponse.self, from: data)
+                            // Save user data if token is provided
+                            UserDefaults.standard.set(apiResponse.data.token, forKey: "authToken")
+                            UserDefaults.standard.set(apiResponse.data.name, forKey: "userName")
+                            UserDefaults.standard.set(apiResponse.data.email, forKey: "userEmail")
+                            UserDefaults.standard.set(apiResponse.data.id, forKey: "userId")
+                            UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                            UserDefaults.standard.synchronize()
+                            completion(.success(()))
+                            return
+                        } catch {
+                            completion(.success(()))
+                            return
+                        }
+                    } else {
+                        // No data in response, just succeed
+                        completion(.success(()))
+                        return
+                    }
                 } else {
                     let message = data.flatMap {
                         String(data: $0, encoding: .utf8)

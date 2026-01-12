@@ -1,9 +1,6 @@
-//
 //  JobDetailViewController.swift
 //  OfflineFirstContractorJobApp
-//
 //  Created by mac on 10-01-2026.
-//
 
 import UIKit
 import AVKit
@@ -31,7 +28,7 @@ class JobDetailViewController: UIViewController {
         super.viewDidLoad()
         setupContainerView()
         setupUI()
-        setupSegmentedControl() // 🔧 FIX 5: Setup segmented control with images
+        setupSegmentedControl()
         setupViewControllers()
         showOverview()
     }
@@ -100,8 +97,7 @@ class JobDetailViewController: UIViewController {
         segmentedControl.selectedSegmentIndex = 0
         
         if #available(iOS 13.0, *) {
-            // Selected segment color
-            segmentedControl.selectedSegmentTintColor = UIColor(hex: "#FFFFFF") // White background
+            segmentedControl.selectedSegmentTintColor = UIColor(hex: "#FFFFFF")
             
             // Selected text
             segmentedControl.setTitleTextAttributes([

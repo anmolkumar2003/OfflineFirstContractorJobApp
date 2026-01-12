@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         signInAccountBtn.layer.borderColor =
-            UIColor.white.withAlphaComponent(0.2).cgColor
+        UIColor.white.withAlphaComponent(0.2).cgColor
         signInAccountBtn.layer.borderWidth = 1
         createAccountBtn.layer.cornerRadius = 16
         signInAccountBtn.layer.cornerRadius = 16
@@ -22,14 +22,18 @@ class ViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        guard createAccountBtn.bounds.width > 0 && createAccountBtn.bounds.height > 0 else {
+            return
+        }
+        
         parentView.applyGradient(
             colors: [
-                UIColor(hex: "#0F172A"),   // top
-                UIColor(hex: "#1E293B"),   // middle - lightest point
-                UIColor(hex: "#0F172A")    // bottom - same as top
+                UIColor(hex: "#0F172A"),
+                UIColor(hex: "#1E293B"),
+                UIColor(hex: "#0F172A")
             ],
-            startPoint: CGPoint(x: 0.5, y: 0.0),   // ← from top center
-            endPoint:   CGPoint(x: 0.5, y: 1.0)    // → to bottom center
+            startPoint: CGPoint(x: 0.5, y: 0.0),
+            endPoint:   CGPoint(x: 0.5, y: 1.0)
         )
         
         createAccountBtn.applyGradient(
@@ -37,7 +41,8 @@ class ViewController: UIViewController {
                 UIColor(hex: "#3B82F6"),
                 UIColor(hex: "#2563EB")
             ],
-            cornerRadius: 16
+            cornerRadius: 16,
+            shadowColor: UIColor(hex: "#3B82F6", alpha: 0.2)
         )
         
         greenView.layer.cornerRadius = 10
@@ -46,24 +51,17 @@ class ViewController: UIViewController {
             centerColor: UIColor(hex: "#22C55E", alpha: 0.15), // ⬅ reduced
             edgeColor: UIColor(hex: "#22C55E", alpha: 0.0)
         )
-
-        
-        createAccountBtn.applyShadow(
-            color: UIColor(hex: "#3B82F6", alpha: 0.2),
-            radius: 10
-        )
     }
     @IBAction func signInAccountBtn(_ sender: Any) {
         let vc = UIStoryboard(name: "Main", bundle: nil)
-                .instantiateViewController(withIdentifier: "SignInViewController") as! SignInViewController
-
-            self.navigationController?.pushViewController(vc, animated: true)
+            .instantiateViewController(withIdentifier: "SignInViewController") as! SignInViewController
+        
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     @IBAction func createAccountBtnAction(_ sender: Any) {
         let vc = UIStoryboard(name: "Main", bundle: nil)
-                .instantiateViewController(withIdentifier: "CreateAccountViewController") as! CreateAccountViewController
-
-            self.navigationController?.pushViewController(vc, animated: true)
+            .instantiateViewController(withIdentifier: "CreateAccountViewController") as! CreateAccountViewController
+        
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 }
-

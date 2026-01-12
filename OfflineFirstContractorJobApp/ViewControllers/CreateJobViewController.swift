@@ -38,8 +38,7 @@ final class CreateJobViewController: UIViewController {
         setupDatePicker()
         setupStatusPicker()
         setupTextFieldDelegates()
-        
-        // 🔧 FIX 2: Set label and button text based on whether editing or creating
+    
         if let job = existingJob {
             createJobLabel.text = "Edit Job"
             createJobButton.setTitle("Update Job", for: .normal)
@@ -102,7 +101,6 @@ final class CreateJobViewController: UIViewController {
         statusTextField.inputAccessoryView = toolbar
     }
     
-    // 🔧 FIX 3: Setup text field delegates for return key
     private func setupTextFieldDelegates() {
         titleTextField.delegate = self
         clientNameTextField.delegate = self
@@ -147,8 +145,6 @@ final class CreateJobViewController: UIViewController {
         let finalDescription = desc?.isEmpty == true ? nil : desc
 
         var job: Job
-
-        // 🔧 FIX 1: Properly update existing job instead of creating new one
         if var editingJob = existingJob {
             // UPDATE EXISTING JOB - keep same localId and id
             editingJob.title = titleTextField.text!.trimmed()
@@ -158,7 +154,11 @@ final class CreateJobViewController: UIViewController {
             editingJob.budget = Double(budgetTextField.text!)!
             editingJob.startDate = startDateTextField.text
             editingJob.status = Job.JobStatus(rawValue: selectedStatus) ?? .pending
-            editingJob.syncStatus = .pending // Mark as pending for sync
+            if editingJob.id != nil && editingJob.syncStatus == .synced {
+                editingJob.syncStatus = .pending
+            } else if editingJob.id == nil {
+                editingJob.syncStatus = .pending
+            }
             
             job = editingJob
         } else {

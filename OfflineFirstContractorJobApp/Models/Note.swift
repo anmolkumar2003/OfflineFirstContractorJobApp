@@ -1,9 +1,6 @@
-//
 //  Note.swift
 //  OfflineFirstContractorJobApp
-//
 //  Created by mac on 10-01-2026.
-//
 
 import Foundation
 

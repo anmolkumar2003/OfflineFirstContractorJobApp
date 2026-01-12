@@ -1,7 +1,5 @@
-//
 //  AuthModels.swift
 //  OfflineFirstContractorJobApp
-//
 
 import Foundation
 
