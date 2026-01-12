@@ -105,3 +105,28 @@ extension UIColor {
         self.init(red: r, green: g, blue: b, alpha: alpha)
     }
 }
+
+extension UIView {
+
+    func applyRadialGradient(
+        centerColor: UIColor,
+        edgeColor: UIColor
+    ) {
+        layer.sublayers?
+            .filter { $0 is CAGradientLayer }
+            .forEach { $0.removeFromSuperlayer() }
+
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.type = .radial
+        gradientLayer.frame = bounds
+        gradientLayer.colors = [
+            centerColor.cgColor,
+            edgeColor.cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
+        gradientLayer.endPoint   = CGPoint(x: 1.0, y: 1.0)
+
+        layer.insertSublayer(gradientLayer, at: 0)
+    }
+}
+

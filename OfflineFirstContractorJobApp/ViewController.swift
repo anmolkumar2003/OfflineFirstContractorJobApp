@@ -9,6 +9,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var signInAccountBtn: UIButton!
     @IBOutlet weak var createAccountBtn: UIButton!
     @IBOutlet weak var parentView: UIView!
+    @IBOutlet weak var greenView: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +40,14 @@ class ViewController: UIViewController {
             cornerRadius: 16
         )
         
+        greenView.layer.cornerRadius = 10
+        greenView.clipsToBounds = true
+        greenView.applyRadialGradient(
+            centerColor: UIColor(hex: "#22C55E", alpha: 0.15), // ⬅ reduced
+            edgeColor: UIColor(hex: "#22C55E", alpha: 0.0)
+        )
+
+        
         createAccountBtn.applyShadow(
             color: UIColor(hex: "#3B82F6", alpha: 0.2),
             radius: 10
@@ -57,3 +66,4 @@ class ViewController: UIViewController {
             self.navigationController?.pushViewController(vc, animated: true)
     }
 }
+
