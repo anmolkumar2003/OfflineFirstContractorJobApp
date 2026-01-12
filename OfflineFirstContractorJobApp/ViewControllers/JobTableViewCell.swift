@@ -6,6 +6,7 @@ import UIKit
 
 class JobTableViewCell: UITableViewCell {
     
+    @IBOutlet weak var statusImg: UIImageView!
     @IBOutlet weak var jobTitleLabel: UILabel!
     @IBOutlet weak var clientNameLabel: UILabel!
     @IBOutlet weak var statusView: UIView!
@@ -41,12 +42,16 @@ class JobTableViewCell: UITableViewCell {
         case .active:
             statusView.backgroundColor = UIColor(hex: "#10B981", alpha: 0.2)
             statusLabel.textColor = UIColor(hex: "#10B981")
+            statusImg.image = UIImage(named: "active")
         case .pending:
-            statusView.backgroundColor = UIColor(hex: "#F59E0B", alpha: 0.2)
+            statusView.backgroundColor = UIColor(hex: "#F59E0B", alpha: 0.1)
             statusLabel.textColor = UIColor(hex: "#F59E0B")
+            statusImg.image = UIImage(named: "pendingIcon")
         case .completed:
             statusView.backgroundColor = UIColor(hex: "#3B82F6", alpha: 0.2)
             statusLabel.textColor = UIColor(hex: "#3B82F6")
+            statusImg.image = UIImage(named: "")
+
         }
         
             }

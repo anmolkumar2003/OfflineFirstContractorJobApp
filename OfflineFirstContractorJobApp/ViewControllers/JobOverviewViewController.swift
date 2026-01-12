@@ -8,6 +8,7 @@
 import UIKit
 
 class JobOverviewViewController: UIViewController {
+    @IBOutlet weak var statusVew: UIView!
     @IBOutlet weak var budgetView: UIView!
     @IBOutlet weak var statusLabel: UILabel!
     @IBOutlet weak var budgetLabel: UILabel!
@@ -22,6 +23,11 @@ class JobOverviewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         loadJob()
+        statusVew.layer.shadowColor = UIColor(hex: "#0000001A").cgColor  // Your color with opacity
+        statusVew.layer.shadowOpacity = 0.1
+        statusVew.layer.shadowRadius = 4      // Adjust for blur
+        statusVew.layer.shadowOffset = CGSize(width: 0, height: 0) // Centered shadow
+        statusVew.layer.masksToBounds = false
     }
     
     override func viewDidLayoutSubviews() {
@@ -45,7 +51,6 @@ class JobOverviewViewController: UIViewController {
     
     private func loadJob() {
         guard let job = job else { return }
-        statusLabel.text = job.status.displayName
         budgetLabel.text = String(format: "$%.0f", job.budget)
         locationLabel.text = job.city
         
@@ -68,13 +73,27 @@ class JobOverviewViewController: UIViewController {
         // Status color
         switch job.status {
         case .active:
-            statusLabel.textColor = UIColor(hex: "#10B981")
+            statusLabel.textColor = UIColor(hex: "#0F172A")
         case .pending:
-            statusLabel.textColor = UIColor(hex: "#F59E0B")
+            statusLabel.textColor = UIColor(hex: "#0F172A")
         case .completed:
-            statusLabel.textColor = UIColor(hex: "#3B82F6")
+            statusLabel.textColor = UIColor(hex: "#0F172A")
+        }
+    }
+    
+    private func updateSyncStatus() {
+        let pendingJobs = LocalStorageManager.shared.getPendingJobs()
+        let pendingNotes = LocalStorageManager.shared.getPendingNotes()
+        
+        if NetworkManager.shared.isConnected {
+            if pendingJobs.isEmpty && pendingNotes.isEmpty {
+                statusLabel.text = "All changes synced"
+            } else {
+                statusLabel.text = "Syncing changes..."
+            }
+        } else {
+            statusLabel.text = "Offline"
         }
     }
 }
-
 

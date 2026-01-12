@@ -34,7 +34,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         } else {
 
             rootVC = storyboard.instantiateViewController(
-                withIdentifier: "CreateAccountViewController"
+                withIdentifier: "ViewController"
             )
         }
 

@@ -11,6 +11,7 @@ import AVFoundation
 
 class JobDetailViewController: UIViewController {
     
+    @IBOutlet weak var statusView: UIView!
     @IBOutlet weak var jobTitleLabel: UILabel!
     @IBOutlet weak var clientNameLabel: UILabel!
     @IBOutlet weak var editButton: UIButton!
@@ -30,6 +31,7 @@ class JobDetailViewController: UIViewController {
         super.viewDidLoad()
         setupContainerView()
         setupUI()
+        setupSegmentedControl() // 🔧 FIX 5: Setup segmented control with images
         setupViewControllers()
         showOverview()
     }
@@ -78,11 +80,44 @@ class JobDetailViewController: UIViewController {
         jobTitleLabel.text = job.title
         clientNameLabel.text = job.clientName
         editButton.layer.cornerRadius = 20
-        // Update segmented control titles if needed
-        if segmentedControl.numberOfSegments >= 3 {
-            segmentedControl.setTitle("Overview", forSegmentAt: 0)
-            segmentedControl.setTitle("Notes", forSegmentAt: 1)
-            segmentedControl.setTitle("Video", forSegmentAt: 2)
+        statusView.layer.shadowColor = UIColor(hex: "#0000001A").cgColor
+        statusView.layer.shadowOpacity = 0.1
+        statusView.layer.shadowRadius = 20
+        statusView.layer.shadowOffset = CGSize(width: 0, height: 0)
+        statusView.layer.masksToBounds = false
+    }
+    
+    //  Setup text segmented control
+    private func setupSegmentedControl() {
+        segmentedControl.removeAllSegments()
+        
+        let segments = ["Overview", "Notes", "Video"]
+        
+        for (index, title) in segments.enumerated() {
+            segmentedControl.insertSegment(withTitle: title, at: index, animated: false)
+        }
+        
+        segmentedControl.selectedSegmentIndex = 0
+        
+        if #available(iOS 13.0, *) {
+            // Selected segment color
+            segmentedControl.selectedSegmentTintColor = UIColor(hex: "#FFFFFF") // White background
+            
+            // Selected text
+            segmentedControl.setTitleTextAttributes([
+                .foregroundColor: UIColor(hex: "#3B82F6"),
+                .font: UIFont.systemFont(ofSize: 14, weight: .semibold)
+            ], for: .selected)
+            
+            // Deselected text
+            segmentedControl.setTitleTextAttributes([
+                .foregroundColor: UIColor(hex: "#64748B"),
+                .font: UIFont.systemFont(ofSize: 14, weight: .regular)
+            ], for: .normal)
+            
+            // Rounded corners for selected segment
+            segmentedControl.layer.cornerRadius = 16
+            segmentedControl.clipsToBounds = true
         }
     }
     

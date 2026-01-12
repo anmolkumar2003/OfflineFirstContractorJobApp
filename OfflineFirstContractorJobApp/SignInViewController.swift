@@ -20,7 +20,7 @@ class SignInViewController: UIViewController {
         super.viewDidLoad()
         backBtnView.layer.cornerRadius = 40/2
         let borderColor = UIColor.black.withAlphaComponent(0.0).cgColor
-
+        
         [emailView, passwordView].forEach { view in
             view?.layer.cornerRadius = 16
             view?.layer.borderWidth = 2
@@ -30,7 +30,7 @@ class SignInViewController: UIViewController {
         
         
         backBtnView.layer.shadowColor =
-            UIColor.black.withAlphaComponent(0.1).cgColor   // #0000001A
+        UIColor.black.withAlphaComponent(0.1).cgColor   // #0000001A
         backBtnView.layer.shadowOpacity = 1
         backBtnView.layer.shadowRadius = 12
         backBtnView.layer.shadowOffset = CGSize(width: 0, height: 4)
@@ -60,13 +60,13 @@ class SignInViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         signInBtn.applyGradient(
-                colors: [
-                    UIColor(hex: "#3B82F6"),
-                    UIColor(hex: "#2563EB")
-                ],
-                cornerRadius: 16,
-                shadowColor: UIColor(hex: "#3B82F6", alpha: 0.2)
-            )
+            colors: [
+                UIColor(hex: "#3B82F6"),
+                UIColor(hex: "#2563EB")
+            ],
+            cornerRadius: 16,
+            shadowColor: UIColor(hex: "#3B82F6", alpha: 0.2)
+        )
     }
     
     private func showAlert(title: String, message: String) {
@@ -144,6 +144,77 @@ class SignInViewController: UIViewController {
                     let errorMessage = (error as NSError).code == 401 ? "Invalid email or password" : error.localizedDescription
                     self?.showAlert(title: "Error", message: errorMessage)
                 }
+            }
+        }
+    }
+}
+
+extension SignInViewController {
+    
+    func handleSuccessfulLogin(userData: AuthUserData) {
+        // Save user data to UserDefaults (already done in APIService)
+        // But we also need to mark as logged in
+        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+        UserDefaults.standard.set(userData.name, forKey: "userName")
+        UserDefaults.standard.synchronize()
+        
+        // Navigate to Dashboard
+        navigateToDashboard()
+    }
+    
+    private func navigateToDashboard() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let dashboardVC = storyboard.instantiateViewController(withIdentifier: "DashboardViewController") as? DashboardViewController {
+            let navigationController = UINavigationController(rootViewController: dashboardVC)
+            navigationController.modalPresentationStyle = .fullScreen
+            
+            // Set as root view controller
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = navigationController
+                window.makeKeyAndVisible()
+                
+                // Optional: Add animation
+                UIView.transition(with: window,
+                                  duration: 0.3,
+                                  options: .transitionCrossDissolve,
+                                  animations: nil)
+            }
+        }
+    }
+}
+
+// MARK: - Logout Helper (Add to any ViewController that needs logout)
+
+extension UIViewController {
+    
+    func logout() {
+        // Clear all user data
+        UserDefaults.standard.removeObject(forKey: "authToken")
+        UserDefaults.standard.removeObject(forKey: "userName")
+        UserDefaults.standard.removeObject(forKey: "userEmail")
+        UserDefaults.standard.removeObject(forKey: "userId")
+        UserDefaults.standard.set(false, forKey: "isLoggedIn")
+        UserDefaults.standard.synchronize()
+        
+        // Clear local data (optional)
+        // LocalStorageManager.shared.clearAllData()
+        
+        // Navigate to login
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let loginVC = storyboard.instantiateViewController(withIdentifier: "SignInViewController") as? UIViewController {
+            let navigationController = UINavigationController(rootViewController: loginVC)
+            navigationController.modalPresentationStyle = .fullScreen
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = navigationController
+                window.makeKeyAndVisible()
+                
+                UIView.transition(with: window,
+                                  duration: 0.3,
+                                  options: .transitionCrossDissolve,
+                                  animations: nil)
             }
         }
     }

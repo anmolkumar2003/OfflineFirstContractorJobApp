@@ -159,3 +159,41 @@ class CreateAccountViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
 }
+
+extension CreateAccountViewController {
+    
+    func handleSuccessfulSignup() {
+        // After signup, navigate to login screen
+        // OR auto-login if your API returns a token on signup
+        
+        let alert = UIAlertController(
+            title: "Success",
+            message: "Account created successfully! Please login.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            self?.navigateToLogin()
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    private func navigateToLogin() {
+        // Pop back to login screen
+        navigationController?.popViewController(animated: true)
+        
+        // OR navigate to login if you're not using navigation controller
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let loginVC = storyboard.instantiateViewController(withIdentifier: "SignInViewController") as? UIViewController {
+            let navigationController = UINavigationController(rootViewController: loginVC)
+            navigationController.modalPresentationStyle = .fullScreen
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = navigationController
+                window.makeKeyAndVisible()
+            }
+        }
+    }
+}

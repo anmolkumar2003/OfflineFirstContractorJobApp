@@ -1,9 +1,6 @@
-//
 //  APIService.swift
 //  OfflineFirstContractorJobApp
-//
 //  Created by mac on 10-01-2026.
-//
 
 import Foundation
 
@@ -146,8 +143,13 @@ class APIService {
                     do {
                         let apiResponse = try JSONDecoder().decode(AuthAPIResponse.self, from: data)
 
-                        // ✅ SAVE TOKEN ONLY ON SUCCESS
+                        // 🔧 FIX 6: Save user data to persist login state
                         UserDefaults.standard.set(apiResponse.data.token, forKey: "authToken")
+                        UserDefaults.standard.set(apiResponse.data.name, forKey: "userName")
+                        UserDefaults.standard.set(apiResponse.data.email, forKey: "userEmail")
+                        UserDefaults.standard.set(apiResponse.data.id, forKey: "userId")
+                        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                        UserDefaults.standard.synchronize()
 
                         completion(.success(apiResponse.data))
                     } catch {
@@ -493,4 +495,3 @@ class APIService {
         }.resume()
     }
 }
-

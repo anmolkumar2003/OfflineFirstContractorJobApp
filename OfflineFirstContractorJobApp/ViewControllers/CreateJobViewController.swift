@@ -1,7 +1,5 @@
-//
 //  CreateJobViewController.swift
 //  OfflineFirstContractorJobApp
-//
 
 import UIKit
 
@@ -39,11 +37,21 @@ final class CreateJobViewController: UIViewController {
         budgetTextField.keyboardType = .decimalPad
         setupDatePicker()
         setupStatusPicker()
-        createJobLabel.text = "Edit Job"
+        setupTextFieldDelegates()
+        
+        // 🔧 FIX 2: Set label and button text based on whether editing or creating
         if let job = existingJob {
-            loadJob(job)
+            createJobLabel.text = "Edit Job"
             createJobButton.setTitle("Update Job", for: .normal)
+            loadJob(job)
+        } else {
+            createJobLabel.text = "Create Job"
+            createJobButton.setTitle("Create Job", for: .normal)
         }
+        
+        // Add tap gesture to dismiss keyboard
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
     }
 
     override func viewDidLayoutSubviews() {
@@ -70,6 +78,7 @@ final class CreateJobViewController: UIViewController {
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
         toolbar.items = [
+            UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
             UIBarButtonItem(barButtonSystemItem: .done,
                             target: self,
                             action: #selector(doneDatePicker))
@@ -85,11 +94,26 @@ final class CreateJobViewController: UIViewController {
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
         toolbar.items = [
+            UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
             UIBarButtonItem(barButtonSystemItem: .done,
                             target: self,
                             action: #selector(doneStatusPicker))
         ]
         statusTextField.inputAccessoryView = toolbar
+    }
+    
+    // 🔧 FIX 3: Setup text field delegates for return key
+    private func setupTextFieldDelegates() {
+        titleTextField.delegate = self
+        clientNameTextField.delegate = self
+        cityTextField.delegate = self
+        budgetTextField.delegate = self
+        startDateTextField.delegate = self
+        statusTextField.delegate = self
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 
     // MARK: - Actions
@@ -118,16 +142,15 @@ final class CreateJobViewController: UIViewController {
     @IBAction func createJobButtonTapped(_ sender: UIButton) {
         guard validateInputs() else { return }
 
-        let selectedStatus =
-            statusOptions[statusPicker.selectedRow(inComponent: 0)]
-
+        let selectedStatus = statusOptions[statusPicker.selectedRow(inComponent: 0)]
         let desc = descriptionTextView.text?.trimmingCharacters(in: .whitespaces)
         let finalDescription = desc?.isEmpty == true ? nil : desc
 
         var job: Job
 
+        // 🔧 FIX 1: Properly update existing job instead of creating new one
         if var editingJob = existingJob {
-            // EDIT
+            // UPDATE EXISTING JOB - keep same localId and id
             editingJob.title = titleTextField.text!.trimmed()
             editingJob.description = finalDescription
             editingJob.clientName = clientNameTextField.text!.trimmed()
@@ -135,9 +158,11 @@ final class CreateJobViewController: UIViewController {
             editingJob.budget = Double(budgetTextField.text!)!
             editingJob.startDate = startDateTextField.text
             editingJob.status = Job.JobStatus(rawValue: selectedStatus) ?? .pending
+            editingJob.syncStatus = .pending // Mark as pending for sync
+            
             job = editingJob
         } else {
-            // CREATE
+            // CREATE NEW JOB
             job = Job(
                 id: nil,
                 title: titleTextField.text!.trimmed(),
@@ -149,15 +174,19 @@ final class CreateJobViewController: UIViewController {
                 status: Job.JobStatus(rawValue: selectedStatus) ?? .pending
             )
             job.localId = UUID().uuidString
+            job.syncStatus = .pending
         }
 
-        job.syncStatus = .pending
-
+        // Save to local storage
         LocalStorageManager.shared.saveJob(job)
+        
+        // Trigger sync
         SyncManager.shared.triggerSync()
 
+        // Notify delegate
         delegate?.jobCreated(job)
 
+        // Navigate back
         if let nav = navigationController {
             nav.popViewController(animated: true)
         } else {
@@ -175,6 +204,11 @@ final class CreateJobViewController: UIViewController {
         budgetTextField.text = String(job.budget)
         startDateTextField.text = job.startDate
         statusTextField.text = job.status.displayName
+        
+        // Set the picker to the correct status
+        if let index = statusOptions.firstIndex(of: job.status.rawValue) {
+            statusPicker.selectRow(index, inComponent: 0, animated: false)
+        }
     }
 
     private func validateInputs() -> Bool {
@@ -226,6 +260,25 @@ extension CreateJobViewController: UIPickerViewDataSource, UIPickerViewDelegate 
                     titleForRow row: Int,
                     forComponent component: Int) -> String? {
         statusOptions[row].capitalized
+    }
+}
+
+// 🔧 FIX 3: UITextFieldDelegate for return key
+extension CreateJobViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        switch textField {
+        case titleTextField:
+            clientNameTextField.becomeFirstResponder()
+        case clientNameTextField:
+            cityTextField.becomeFirstResponder()
+        case cityTextField:
+            budgetTextField.becomeFirstResponder()
+        case budgetTextField:
+            startDateTextField.becomeFirstResponder()
+        default:
+            textField.resignFirstResponder()
+        }
+        return true
     }
 }
 

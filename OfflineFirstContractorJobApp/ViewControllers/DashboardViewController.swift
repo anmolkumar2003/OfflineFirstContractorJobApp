@@ -6,6 +6,7 @@ import UIKit
 
 class DashboardViewController: UIViewController {
     
+    @IBOutlet weak var statusview: UIView!
     @IBOutlet weak var jobCountLbl: UILabel!
     @IBOutlet weak var userNameBtn: UIButton!
     @IBOutlet weak var welcomeLabel: UILabel!
@@ -33,6 +34,7 @@ class DashboardViewController: UIViewController {
             name: NSNotification.Name("NetworkStatusChanged"),
             object: nil
         )
+       
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -53,6 +55,13 @@ class DashboardViewController: UIViewController {
         searchBar.delegate = self
         searchBar.searchBarStyle = .minimal
         searchBar.placeholder = "Search jobs..."
+        searchBar.layer.backgroundColor = UIColor(hex: "#F1F5F9").cgColor
+        searchBar.layer.cornerRadius = 20
+        statusview.layer.shadowColor = UIColor(hex: "#0000001A").cgColor
+        statusview.layer.shadowOpacity = 0.1
+        statusview.layer.shadowRadius = 20
+        statusview.layer.shadowOffset = CGSize(width: 0, height: 0)
+        statusview.layer.masksToBounds = false
     }
     
     private func setupTableView() {

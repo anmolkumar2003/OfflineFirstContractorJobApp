@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+import IQKeyboardManagerSwift
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -16,6 +16,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize sync manager
         _ = SyncManager.shared
         _ = NetworkManager.shared
+        let keyboardManager = IQKeyboardManager.shared
+        keyboardManager.isEnabled = true
+        keyboardManager.resignOnTouchOutside = true
         return true
     }
 
