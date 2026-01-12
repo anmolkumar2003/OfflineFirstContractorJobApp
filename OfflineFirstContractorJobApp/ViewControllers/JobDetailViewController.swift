@@ -79,7 +79,7 @@ class JobDetailViewController: UIViewController {
     private func setupUI() {
         jobTitleLabel.text = job.title
         clientNameLabel.text = job.clientName
-        editButton.layer.cornerRadius = 20
+        editButton.layer.cornerRadius = 18
         statusView.layer.shadowColor = UIColor(hex: "#0000001A").cgColor
         statusView.layer.shadowOpacity = 0.1
         statusView.layer.shadowRadius = 20
